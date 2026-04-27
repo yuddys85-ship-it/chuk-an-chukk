@@ -1,128 +1,158 @@
-// ==========================
-// GLOBAL STATE
-// ==========================
-let currentUser = null;
-let unlockedChuk = 10000;
-let lockedChuk = 5000;
+// ==============================
+// INIT PI SDK
+// ==============================
+document.addEventListener("DOMContentLoaded", function () {
+  if (typeof Pi !== "undefined") {
+    Pi.init({
+      version: "2.0",
+      sandbox: true // TESTNET MODE
+    });
+  } else {
+    alert("Buka aplikasi di Pi Browser!");
+  }
 
-// ==========================
+  loadWallet();
+});
+
+// ==============================
+// GLOBAL STATE
+// ==============================
+let currentUser = null;
+
+let wallet = {
+  chuk: 0,
+  locked: 0,
+  testPi: 10
+};
+
+// ==============================
 // LOGIN PI
-// ==========================
-function login() {
-  Pi.authenticate(["username"], function(auth) {
+// ==============================
+async function login() {
+  try {
+    const auth = await Pi.authenticate(["username"]);
+
     currentUser = auth.user;
 
-    document.getElementById("username").innerText = currentUser.username;
-    document.getElementById("userArea").classList.remove("hidden");
+    document.getElementById("username").innerText =
+      "👤 " + currentUser.username;
 
-    showNotif("Login berhasil: " + currentUser.username);
+    showSection("app");
 
-    loadWallet();
-  }, function(error) {
-    console.error(error);
-    alert("Login gagal");
-  });
+    notify("Login berhasil!");
+
+  } catch (err) {
+    console.error(err);
+    notify("Login gagal");
+  }
 }
 
-// ==========================
-// LOAD WALLET
-// ==========================
+// ==============================
+// WALLET SYSTEM
+// ==============================
 function loadWallet() {
-  document.getElementById("unlocked").innerText = unlockedChuk;
-  document.getElementById("locked").innerText = lockedChuk;
+  const saved = localStorage.getItem("chuk_wallet");
+
+  if (saved) {
+    wallet = JSON.parse(saved);
+  } else {
+    // Default TEST coins
+    wallet.chuk = 50000;
+    wallet.locked = 25000;
+    wallet.testPi = 10;
+    saveWallet();
+  }
+
+  updateUI();
 }
 
-// ==========================
-// EXCHANGE CHUK → PI
-// ==========================
-function exchange() {
-  if (unlockedChuk < 10000) {
-    alert("Saldo tidak cukup");
+function saveWallet() {
+  localStorage.setItem("chuk_wallet", JSON.stringify(wallet));
+}
+
+function updateUI() {
+  document.getElementById("chukBalance").innerText = wallet.chuk;
+  document.getElementById("lockedBalance").innerText = wallet.locked;
+  document.getElementById("piBalance").innerText = wallet.testPi;
+}
+
+// ==============================
+// UNLOCK SYSTEM (SIMULASI MINGGU)
+// ==============================
+function unlockChuk() {
+  if (wallet.locked <= 0) {
+    notify("Tidak ada Chuk terkunci");
     return;
   }
 
-  let confirmTx = confirm("Tukar 10,000 Chuk → 1 Pi ?");
+  wallet.chuk += wallet.locked;
+  wallet.locked = 0;
+
+  saveWallet();
+  updateUI();
+
+  notify("Chuk berhasil di-unlock!");
+}
+
+// ==============================
+// EXCHANGE CHUK → PI (SIMULASI)
+// RATE: 1 Pi = 10,000 Chuk
+// ==============================
+function exchangeChuk() {
+  const amount = parseInt(prompt("Masukkan jumlah Chuk:"));
+
+  if (!amount || amount <= 0) {
+    notify("Jumlah tidak valid");
+    return;
+  }
+
+  if (amount > wallet.chuk) {
+    notify("Saldo tidak cukup");
+    return;
+  }
+
+  const pi = amount / 10000;
+
+  const confirmTx = confirm(
+    `Tukar ${amount} Chuk menjadi ${pi} Pi?\n\nTransaksi tidak dapat dibatalkan.`
+  );
 
   if (!confirmTx) return;
 
-  unlockedChuk -= 10000;
-  updateWallet();
+  wallet.chuk -= amount;
+  wallet.testPi += pi;
 
-  addHistory("Exchange 10,000 Chuk → 1 Pi");
+  saveWallet();
+  updateUI();
 
-  showNotif("Exchange berhasil (Testnet)");
+  notify("Berhasil tukar ke Pi!");
 }
 
-// ==========================
-// UPDATE WALLET
-// ==========================
-function updateWallet() {
-  document.getElementById("unlocked").innerText = unlockedChuk;
-  document.getElementById("locked").innerText = lockedChuk;
+// ==============================
+// DEMO TAMBAH CHUK
+// ==============================
+function earnChuk() {
+  wallet.chuk += 1000;
+
+  saveWallet();
+  updateUI();
+
+  notify("+1000 Chuk didapat!");
 }
 
-// ==========================
-// HISTORY TRANSACTION
-// ==========================
-function addHistory(text) {
-  let history = JSON.parse(localStorage.getItem("history")) || [];
+// ==============================
+// UI CONTROL
+// ==============================
+function showSection(id) {
+  document.getElementById("loginPage").style.display = "none";
+  document.getElementById("appPage").style.display = "none";
 
-  history.push({
-    text: text,
-    time: new Date().toLocaleString()
-  });
-
-  localStorage.setItem("history", JSON.stringify(history));
-
-  renderHistory();
+  document.getElementById(id + "Page").style.display = "block";
 }
 
-function renderHistory() {
-  let history = JSON.parse(localStorage.getItem("history")) || [];
-  let container = document.getElementById("history");
-
-  if (!container) return;
-
-  container.innerHTML = "";
-
-  history.reverse().forEach(item => {
-    let div = document.createElement("div");
-    div.className = "card";
-    div.innerHTML = `
-      <p>${item.text}</p>
-      <small>${item.time}</small>
-    `;
-    container.appendChild(div);
-  });
+// ==============================
+// NOTIFICATION
+// ==============================
+function notify(msg) {
+  alert(msg);
 }
-
-// ==========================
-// NOTIFICATION SYSTEM
-// ==========================
-function showNotif(message) {
-  let notif = document.createElement("div");
-  notif.innerText = message;
-
-  notif.style.position = "fixed";
-  notif.style.bottom = "20px";
-  notif.style.left = "50%";
-  notif.style.transform = "translateX(-50%)";
-  notif.style.background = "#000";
-  notif.style.color = "#fff";
-  notif.style.padding = "10px 20px";
-  notif.style.borderRadius = "8px";
-  notif.style.zIndex = "999";
-
-  document.body.appendChild(notif);
-
-  setTimeout(() => {
-    notif.remove();
-  }, 3000);
-}
-
-// ==========================
-// AUTO LOAD
-// ==========================
-window.onload = function() {
-  renderHistory();
-};
