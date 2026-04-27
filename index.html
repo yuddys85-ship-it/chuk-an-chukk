@@ -4,60 +4,143 @@
   <meta charset="UTF-8">
   <title>Chuk an Chukk</title>
 
+  <!-- Pi SDK -->
   <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      if (typeof Pi !== "undefined") {
-        Pi.init({
-          version: "2.0",
-          sandbox: true
-        });
-      } else {
-        alert("Buka di Pi Browser!");
+    let userData = null;
+
+    // INIT PI SDK
+    window.onload = function () {
+      if (typeof Pi === "undefined") {
+        alert("⚠️ Buka di Pi Browser!");
+        return;
       }
-    });
 
+      Pi.init({
+        version: "2.0",
+        sandbox: true // TESTNET MODE
+      });
+
+      console.log("✅ Pi SDK Ready");
+    };
+
+    // LOGIN FUNCTION
     async function login() {
-      try {
-        if (typeof Pi === "undefined") {
-          alert("Harus di Pi Browser");
-          return;
-        }
+      if (typeof Pi === "undefined") {
+        alert("Harus buka di Pi Browser");
+        return;
+      }
 
+      try {
         const auth = await Pi.authenticate(["username"]);
-        alert("Welcome " + auth.user.username);
+        userData = auth.user;
+
+        document.getElementById("username").innerText =
+          "👋 Welcome, " + userData.username;
+
+        document.getElementById("loginBtn").style.display = "none";
+        document.getElementById("app").style.display = "block";
+
       } catch (err) {
         console.error(err);
         alert("Login gagal");
       }
     }
+
+    // LOGOUT (SIMULASI)
+    function logout() {
+      userData = null;
+      document.getElementById("app").style.display = "none";
+      document.getElementById("loginBtn").style.display = "block";
+      document.getElementById("username").innerText = "";
+    }
+
+    // DEMO TAMBAH CHUK
+    function addChuk() {
+      let balance = parseInt(localStorage.getItem("chuk")) || 0;
+      balance += 1000;
+      localStorage.setItem("chuk", balance);
+      updateBalance();
+    }
+
+    function updateBalance() {
+      let balance = localStorage.getItem("chuk") || 0;
+      document.getElementById("balance").innerText = balance + " CHUK";
+    }
+
+    // LOAD BALANCE
+    window.addEventListener("load", () => {
+      updateBalance();
+    });
   </script>
 
   <style>
     body {
       font-family: Arial;
-      background: #6b2cff;
+      background: linear-gradient(135deg, #6b2cff, #8a4dff);
       color: white;
       text-align: center;
-      padding: 50px;
+      padding: 40px;
     }
+
+    .container {
+      max-width: 400px;
+      margin: auto;
+      background: rgba(255,255,255,0.1);
+      padding: 30px;
+      border-radius: 12px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
     button {
       padding: 12px 20px;
+      margin: 10px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       background: white;
       color: #6b2cff;
       font-weight: bold;
       cursor: pointer;
+      width: 100%;
+    }
+
+    .wallet {
+      background: rgba(255,255,255,0.2);
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+
+    #app {
+      display: none;
     }
   </style>
 </head>
 
 <body>
-  <h1>Chuk an Chukk</h1>
-  <p>Live Social App for Pi Community</p>
 
-  <button onclick="login()">Login with Pi</button>
+  <div class="container">
+    <h1>💜 Chuk an Chukk</h1>
+    <p>Live Social App for Pi Community</p>
+
+    <h3 id="username"></h3>
+
+    <button id="loginBtn" onclick="login()">Login with Pi</button>
+
+    <div id="app">
+      <div class="wallet">
+        <h3>👛 Wallet</h3>
+        <p id="balance">0 CHUK</p>
+      </div>
+
+      <button onclick="addChuk()">+1000 CHUK (Demo)</button>
+      <button onclick="logout()">Logout</button>
+    </div>
+  </div>
+
 </body>
 </html>
