@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
       sandbox: true // TESTNET MODE
     });
   } else {
-    alert("Buka aplikasi di Pi Browser!");
+    alert("⚠️ Buka aplikasi di Pi Browser!");
   }
 
   loadWallet();
@@ -26,11 +26,20 @@ let wallet = {
 };
 
 // ==============================
-// LOGIN PI
+// LOGIN PI (FIXED)
 // ==============================
 async function login() {
   try {
-    const auth = await Pi.authenticate(["username"]);
+    if (typeof Pi === "undefined") {
+      notify("Harus buka di Pi Browser!");
+      return;
+    }
+
+    const scopes = ["username"];
+
+    const auth = await Pi.authenticate(scopes, function(payment) {
+      console.log("Incomplete payment:", payment);
+    });
 
     currentUser = auth.user;
 
@@ -39,11 +48,11 @@ async function login() {
 
     showSection("app");
 
-    notify("Login berhasil!");
+    notify("✅ Login berhasil!");
 
   } catch (err) {
     console.error(err);
-    notify("Login gagal");
+    notify("❌ Login gagal");
   }
 }
 
@@ -56,7 +65,6 @@ function loadWallet() {
   if (saved) {
     wallet = JSON.parse(saved);
   } else {
-    // Default TEST coins
     wallet.chuk = 50000;
     wallet.locked = 25000;
     wallet.testPi = 10;
@@ -77,7 +85,7 @@ function updateUI() {
 }
 
 // ==============================
-// UNLOCK SYSTEM (SIMULASI MINGGU)
+// UNLOCK SYSTEM
 // ==============================
 function unlockChuk() {
   if (wallet.locked <= 0) {
@@ -91,12 +99,11 @@ function unlockChuk() {
   saveWallet();
   updateUI();
 
-  notify("Chuk berhasil di-unlock!");
+  notify("🔓 Chuk berhasil di-unlock!");
 }
 
 // ==============================
-// EXCHANGE CHUK → PI (SIMULASI)
-// RATE: 1 Pi = 10,000 Chuk
+// EXCHANGE (SIMULASI)
 // ==============================
 function exchangeChuk() {
   const amount = parseInt(prompt("Masukkan jumlah Chuk:"));
@@ -125,7 +132,7 @@ function exchangeChuk() {
   saveWallet();
   updateUI();
 
-  notify("Berhasil tukar ke Pi!");
+  notify("✅ Berhasil tukar ke Pi!");
 }
 
 // ==============================
@@ -137,7 +144,54 @@ function earnChuk() {
   saveWallet();
   updateUI();
 
-  notify("+1000 Chuk didapat!");
+  notify("🎁 +1000 Chuk didapat!");
+}
+
+// ==============================
+// PAYMENT PI (REAL FLOW)
+// ==============================
+async function payWithPi() {
+  try {
+    const payment = await Pi.createPayment({
+      amount: 0.01,
+      memo: "Buy CHUK",
+      metadata: { type: "chuk_purchase" }
+    }, {
+      onReadyForServerApproval: async function(paymentId) {
+        await fetch("https://YOUR-BACKEND-URL/approve", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ paymentId })
+        });
+      },
+
+      onReadyForServerCompletion: async function(paymentId, txid) {
+        await fetch("https://YOUR-BACKEND-URL/complete", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ paymentId })
+        });
+
+        notify("💸 Pembayaran berhasil!");
+      },
+
+      onCancel: function() {
+        notify("❌ Pembayaran dibatalkan");
+      },
+
+      onError: function(err) {
+        console.error(err);
+        notify("⚠️ Error pembayaran");
+      }
+    });
+
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 // ==============================
