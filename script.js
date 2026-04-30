@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
   if (typeof Pi !== "undefined") {
     Pi.init({
       version: "2.0",
-      sandbox: true // TESTNET MODE
+      sandbox: true
     });
   } else {
     alert("⚠️ Buka aplikasi di Pi Browser!");
@@ -13,6 +13,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
   loadWallet();
 });
+
+// ==============================
+// BACKEND URL (SUDAH FIX)
+// ==============================
+const BASE_URL = "https://chuk-an-chukk-beckend.vercel.app/api";
 
 // ==============================
 // GLOBAL STATE
@@ -26,7 +31,7 @@ let wallet = {
 };
 
 // ==============================
-// LOGIN PI (FIXED)
+// LOGIN PI
 // ==============================
 async function login() {
   try {
@@ -35,9 +40,7 @@ async function login() {
       return;
     }
 
-    const scopes = ["username"];
-
-    const auth = await Pi.authenticate(scopes, function(payment) {
+    const auth = await Pi.authenticate(["username"], function(payment) {
       console.log("Incomplete payment:", payment);
     });
 
@@ -148,17 +151,26 @@ function earnChuk() {
 }
 
 // ==============================
-// PAYMENT PI (REAL FLOW)
+// PAYMENT PI (SUDAH TERHUBUNG)
 // ==============================
 async function payWithPi() {
   try {
+    if (typeof Pi === "undefined") {
+      notify("Buka di Pi Browser!");
+      return;
+    }
+
     const payment = await Pi.createPayment({
       amount: 0.01,
       memo: "Buy CHUK",
       metadata: { type: "chuk_purchase" }
     }, {
+
+      // APPROVE
       onReadyForServerApproval: async function(paymentId) {
-        await fetch("https://YOUR-BACKEND-URL/approve", {
+        console.log("APPROVE:", paymentId);
+
+        await fetch(BASE_URL + "/approve", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -167,8 +179,11 @@ async function payWithPi() {
         });
       },
 
+      // COMPLETE
       onReadyForServerCompletion: async function(paymentId, txid) {
-        await fetch("https://YOUR-BACKEND-URL/complete", {
+        console.log("COMPLETE:", paymentId, txid);
+
+        await fetch(BASE_URL + "/complete", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
