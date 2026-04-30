@@ -4,10 +4,9 @@
   <meta charset="UTF-8" />
   <title>Chuk an Chukk</title>
 
-  <!-- PI SDK -->
+  <!-- Pi SDK -->
   <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 
-  <!-- STYLE -->
   <style>
     body {
       font-family: Arial;
@@ -36,10 +35,6 @@
       font-weight: bold;
       cursor: pointer;
     }
-
-    button:hover {
-      opacity: 0.9;
-    }
   </style>
 </head>
 
@@ -57,30 +52,31 @@
   <div id="appPage" style="display:none;">
     <h2 id="username"></h2>
 
+    <!-- WALLET -->
     <div class="card">
-      <h3>Wallet</h3>
+      <h3>Your Wallet</h3>
       <p>Chuk: <span id="chukBalance">0</span></p>
       <p>Locked: <span id="lockedBalance">0</span></p>
       <p>Pi: <span id="piBalance">0</span></p>
     </div>
 
+    <!-- ACTION -->
     <div class="card">
-      <button onclick="earnChuk()">🎁 Earn Chuk</button>
+      <button onclick="earnChuk()">🎁 Earn</button>
       <button onclick="unlockChuk()">🔓 Unlock</button>
       <button onclick="exchangeChuk()">🔄 Exchange</button>
     </div>
 
+    <!-- BUY (INI YANG KAMU CARI 🔥) -->
     <div class="card">
-      <h3>Buy</h3>
+      <h3>Buy CHUK</h3>
       <button onclick="payWithPi()">💸 Buy CHUK</button>
     </div>
+
   </div>
 
-  <!-- SCRIPT -->
   <script>
-    // ==============================
-    // INIT PI SDK
-    // ==============================
+    // INIT PI
     document.addEventListener("DOMContentLoaded", function () {
       if (typeof Pi !== "undefined") {
         Pi.init({
@@ -94,6 +90,7 @@
       loadWallet();
     });
 
+    // BACKEND
     const BASE_URL = "https://chuk-an-chukk-beckend.vercel.app/api";
 
     let currentUser = null;
@@ -104,9 +101,7 @@
       testPi: 10
     };
 
-    // ==============================
     // LOGIN
-    // ==============================
     async function login() {
       try {
         const auth = await Pi.authenticate(["username"]);
@@ -123,9 +118,7 @@
       }
     }
 
-    // ==============================
     // WALLET
-    // ==============================
     function loadWallet() {
       const saved = localStorage.getItem("chuk_wallet");
 
@@ -177,9 +170,7 @@
       notify("✅ Ditukar ke Pi");
     }
 
-    // ==============================
-    // PAYMENT PI
-    // ==============================
+    // PAYMENT
     async function payWithPi() {
       try {
         const payment = await Pi.createPayment({
@@ -214,7 +205,7 @@
       }
     }
 
-    // ==============================
+    // UI
     function showSection(id) {
       document.getElementById("loginPage").style.display = "none";
       document.getElementById("appPage").style.display = "none";
