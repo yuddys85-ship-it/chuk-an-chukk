@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Chuk an Chukk</title>
 
   <!-- Pi SDK -->
@@ -36,18 +36,20 @@
       cursor: pointer;
     }
 
-    .btn-green {
-      background: #00c853;
-      color: white;
-    }
-
     .btn-purple {
       background: #6b2cff;
       color: white;
     }
 
-    .center {
+    .btn-green {
+      background: #00c853;
+      color: white;
+    }
+
+    #loading {
+      display: none;
       text-align: center;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -55,7 +57,7 @@
 <body>
 
 <!-- LOGIN -->
-<div id="loginPage" class="center">
+<div id="loginPage">
   <h1>Chuk an Chukk</h1>
   <p>Live Social App for Pi Community</p>
   <button class="btn-purple" onclick="login()">Login with Pi</button>
@@ -66,148 +68,202 @@
 
   <h2 id="username"></h2>
 
+  <!-- WALLET -->
   <div class="card">
-    <h3>## Your Wallet</h3>
+    <h3>Your Wallet</h3>
 
-    <p><b>TEST MODE</b></p>
-
-    <p>Unlocked Balance (Test)</p>
+    <p>Unlocked Balance</p>
     <h2 id="chukBalance">0</h2>
-    <p>TEST CHUK</p>
 
-    <p>Locked Balance (Test)</p>
+    <p>Locked Balance</p>
     <h2 id="lockedBalance">0</h2>
 
-    <p>Test Pi Balance</p>
+    <p>Pi Balance</p>
     <h2 id="piBalance">0</h2>
 
     <p>Total Balance</p>
     <h2 id="totalBalance">0</h2>
   </div>
 
+  <!-- ACTION -->
   <div class="card">
     <button class="btn-purple" onclick="earnChuk()">🎁 Earn</button>
     <button class="btn-purple" onclick="unlockChuk()">🔓 Unlock</button>
     <button class="btn-purple" onclick="exchangeChuk()">🔄 Exchange</button>
   </div>
 
-  <!-- 🔥 BUY SECTION -->
+  <!-- 🔥 BUY -->
   <div class="card">
     <h3>Buy CHUK</h3>
     <button class="btn-green" onclick="payWithPi()">💸 Buy CHUK with Pi</button>
+    <div id="loading">⏳ Processing payment...</div>
   </div>
 
 </div>
 
 <script>
-  // INIT
-  document.addEventListener("DOMContentLoaded", function () {
-    if (typeof Pi !== "undefined") {
-      Pi.init({ version: "2.0", sandbox: true });
-    } else {
-      alert("Buka di Pi Browser!");
-    }
-    loadWallet();
-  });
-
-  const BASE_URL = "https://chuk-an-chukk-beckend.vercel.app/api";
-
-  let wallet = { chuk: 50000, locked: 25000, testPi: 10 };
-
-  // LOGIN
-  async function login() {
-    try {
-      const auth = await Pi.authenticate(["username"]);
-      document.getElementById("username").innerText =
-        "Welcome back!\n" + auth.user.username;
-
-      showSection("app");
-    } catch {
-      alert("Login gagal");
-    }
+document.addEventListener("DOMContentLoaded", function () {
+  if (typeof Pi !== "undefined") {
+    Pi.init({ version: "2.0", sandbox: true });
+  } else {
+    alert("⚠️ Buka di Pi Browser!");
   }
 
-  // WALLET
-  function loadWallet() {
-    const saved = localStorage.getItem("wallet");
-    if (saved) wallet = JSON.parse(saved);
-    updateUI();
+  loadWallet();
+});
+
+// 🔥 GANTI DENGAN BACKEND KAMU
+const BASE_URL = "https://chuk-an-chukk-beckend.vercel.app/api";
+
+let currentUser = null;
+
+let wallet = {
+  chuk: 50000,
+  locked: 25000,
+  testPi: 10
+};
+
+// LOGIN
+async function login() {
+  try {
+    const auth = await Pi.authenticate(["username"]);
+    currentUser = auth.user;
+
+    document.getElementById("username").innerText =
+      "Welcome back!\n" + currentUser.username;
+
+    showSection("app");
+
+  } catch (err) {
+    alert("Login gagal");
+  }
+}
+
+// WALLET
+function loadWallet() {
+  const saved = localStorage.getItem("wallet");
+
+  if (saved) {
+    wallet = JSON.parse(saved);
   }
 
-  function saveWallet() {
-    localStorage.setItem("wallet", JSON.stringify(wallet));
+  updateUI();
+}
+
+function saveWallet() {
+  localStorage.setItem("wallet", JSON.stringify(wallet));
+}
+
+function updateUI() {
+  document.getElementById("chukBalance").innerText = wallet.chuk;
+  document.getElementById("lockedBalance").innerText = wallet.locked;
+  document.getElementById("piBalance").innerText = wallet.testPi;
+  document.getElementById("totalBalance").innerText =
+    wallet.chuk + wallet.locked;
+}
+
+// ACTION
+function earnChuk() {
+  wallet.chuk += 1000;
+  saveWallet();
+  updateUI();
+  alert("+1000 CHUK");
+}
+
+function unlockChuk() {
+  wallet.chuk += wallet.locked;
+  wallet.locked = 0;
+  saveWallet();
+  updateUI();
+  alert("Unlocked!");
+}
+
+function exchangeChuk() {
+  let amt = parseInt(prompt("Jumlah Chuk:"));
+
+  if (!amt || amt > wallet.chuk) {
+    alert("Tidak valid");
+    return;
   }
 
-  function updateUI() {
-    document.getElementById("chukBalance").innerText = wallet.chuk;
-    document.getElementById("lockedBalance").innerText = wallet.locked;
-    document.getElementById("piBalance").innerText = wallet.testPi;
-    document.getElementById("totalBalance").innerText =
-      wallet.chuk + wallet.locked;
+  wallet.chuk -= amt;
+  wallet.testPi += amt / 10000;
+
+  saveWallet();
+  updateUI();
+  alert("Berhasil ditukar");
+}
+
+// LOADING
+function showLoading(show) {
+  document.getElementById("loading").style.display =
+    show ? "block" : "none";
+}
+
+// 💸 PAYMENT FINAL
+async function payWithPi() {
+
+  if (typeof Pi === "undefined") {
+    alert("Buka di Pi Browser!");
+    return;
   }
 
-  function earnChuk() {
-    wallet.chuk += 1000;
-    saveWallet();
-    updateUI();
-    alert("+1000 Chuk");
+  try {
+    showLoading(true);
+
+    await Pi.createPayment({
+      amount: 0.01,
+      memo: "Buy CHUK",
+      metadata: { user: currentUser?.username || "guest" }
+    }, {
+
+      onReadyForServerApproval: async (paymentId) => {
+        await fetch(BASE_URL + "/approve", {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ paymentId })
+        });
+      },
+
+      onReadyForServerCompletion: async (paymentId, txid) => {
+        await fetch(BASE_URL + "/complete", {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ paymentId, txid })
+        });
+
+        wallet.chuk += 1000;
+        saveWallet();
+        updateUI();
+
+        showLoading(false);
+        alert("💸 Pembayaran berhasil +1000 CHUK!");
+      },
+
+      onCancel: () => {
+        showLoading(false);
+        alert("Dibatalkan");
+      },
+
+      onError: () => {
+        showLoading(false);
+        alert("Error pembayaran");
+      }
+
+    });
+
+  } catch (e) {
+    showLoading(false);
+    console.error(e);
   }
+}
 
-  function unlockChuk() {
-    wallet.chuk += wallet.locked;
-    wallet.locked = 0;
-    saveWallet();
-    updateUI();
-    alert("Unlocked!");
-  }
-
-  function exchangeChuk() {
-    let amt = parseInt(prompt("Jumlah Chuk:"));
-    if (!amt || amt > wallet.chuk) return alert("Tidak valid");
-
-    wallet.chuk -= amt;
-    wallet.testPi += amt / 10000;
-
-    saveWallet();
-    updateUI();
-    alert("Berhasil ditukar");
-  }
-
-  // 🔥 PAYMENT
-  async function payWithPi() {
-    try {
-      await Pi.createPayment({
-        amount: 0.01,
-        memo: "Buy CHUK"
-      }, {
-        onReadyForServerApproval: async (paymentId) => {
-          await fetch(BASE_URL + "/approve", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ paymentId })
-          });
-        },
-        onReadyForServerCompletion: async (paymentId) => {
-          await fetch(BASE_URL + "/complete", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ paymentId })
-          });
-          alert("💸 Pembayaran berhasil!");
-        },
-        onCancel: () => alert("Dibatalkan"),
-        onError: () => alert("Error pembayaran")
-      });
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  function showSection(id) {
-    document.getElementById("loginPage").style.display = "none";
-    document.getElementById("appPage").style.display = "none";
-    document.getElementById(id + "Page").style.display = "block";
-  }
+// UI
+function showSection(id) {
+  document.getElementById("loginPage").style.display = "none";
+  document.getElementById("appPage").style.display = "none";
+  document.getElementById(id + "Page").style.display = "block";
+}
 </script>
 
 </body>
