@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chuk an Chukk</title>
+
+  <!-- Pi SDK -->
+  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #0b0b0f;
+      color: white;
+      padding: 20px;
+    }
+
+    h1, h2 {
+      text-align: center;
+    }
+
+    .card {
+      background: #1c1c25;
+      padding: 15px;
+      border-radius: 10px;
+      margin: 10px 0;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-purple {
+      background: #6b2cff;
+      color: white;
+    }
+
+    .btn-green {
+      background: #00c853;
+      color: white;
+    }
+
+    #loading {
+      display: none;
+      text-align: center;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="loginPage">
+  <h1>Chuk an Chukk</h1>
+  <p>Login with Pi</p>
+  <button class="btn-purple" onclick="login()">Login with Pi</button>
+</div>
+
+<!-- APP -->
+<div id="appPage" style="display:none;">
+
+  <h2 id="username"></h2>
+
+  <!-- WALLET -->
+  <div class="card">
+    <h3>Your Wallet</h3>
+
+    <p>CHUK</p>
+    <h2 id="chukBalance">0</h2>
+
+    <p>PI</p>
+    <h2 id="piBalance">0</h2>
+  </div>
+
+  <!-- ACTION -->
+  <div class="card">
+    <button class="btn-purple" onclick="earnChuk()">🎁 Earn</button>
+  </div>
+
+  <!-- BUY -->
+  <div class="card">
+    <h3>Buy CHUK</h3>
+    <button class="btn-green" onclick="payWithPi()">💸 Buy CHUK with Pi</button>
+    <div id="loading">⏳ Processing...</div>
+  </div>
+
+</div>
+
+<script>
+const BASE_URL = "https://chuk-an-chukk-beckend.vercel.app/api";
+
+let wallet = {
+  chuk: 50000,
+  pi: 10
+};
+
+let currentUser = null;
+
+// INIT
+document.addEventListener("DOMContentLoaded", () => {
+  if (typeof Pi !== "undefined") {
+    Pi.init({ version: "2.0", sandbox: true });
+  } else {
+    alert("⚠️ Buka di Pi Browser");
+  }
+
+  updateUI();
+});
+
+// LOGIN
+async function login() {
+  try {
+    const auth = await Pi.authenticate(["username"]);
+    currentUser = auth.user;
+
+    document.getElementById("username").innerText =
+      "Welcome " + currentUser.username;
+
+    document.getElementById("loginPage").style.display = "none";
+    document.getElementById("appPage").style.display = "block";
+
+  } catch {
+    alert("Login gagal");
+  }
+}
+
+// UI UPDATE
+function updateUI() {
+  document.getElementById("chukBalance").innerText = wallet.chuk;
+  document.getElementById("piBalance").innerText = wallet.pi;
+}
+
+// EARN
+function earnChuk() {
+  wallet.chuk += 1000;
+  updateUI();
+}
+
+// LOADING
+function showLoading(show) {
+  document.getElementById("loading").style.display =
+    show ? "block" : "none";
+}
+
+// 💸 PAYMENT
+async function payWithPi() {
+
+  if (typeof Pi === "undefined") {
+    alert("Harus di Pi Browser!");
+    return;
+  }
+
+  try {
+    showLoading(true);
+
+    await Pi.createPayment({
+      amount: 0.01,
+      memo: "Buy CHUK",
+      metadata: { user: currentUser?.username || "guest" }
+    }, {
+
+      onReadyForServerApproval: async (paymentId) => {
+        await fetch(BASE_URL + "/approve", {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ paymentId })
+        });
+      },
+
+      onReadyForServerCompletion: async (paymentId, txid) => {
+        await fetch(BASE_URL + "/complete", {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ paymentId, txid })
+        });
+
+        wallet.chuk += 1000;
+        updateUI();
+
+        showLoading(false);
+        alert("💸 Payment sukses +1000 CHUK!");
+      },
+
+      onCancel: () => {
+        showLoading(false);
+        alert("Dibatalkan");
+      },
+
+      onError: (err) => {
+        showLoading(false);
+        console.error(err);
+        alert("Error pembayaran");
+      }
+
+    });
+
+  } catch (e) {
+    showLoading(false);
+    console.error(e);
+  }
+}
+</script>
+
+</body>
+</html>
