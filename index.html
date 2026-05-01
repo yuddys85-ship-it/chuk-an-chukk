@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>Chuk an Chukk</title>
 
-  <!-- Pi SDK -->
   <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 
   <style>
@@ -45,176 +44,86 @@
       background: #00c853;
       color: white;
     }
-
-    #loading {
-      display: none;
-      text-align: center;
-      margin-top: 10px;
-    }
   </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
 <div id="loginPage">
   <h1>Chuk an Chukk</h1>
-  <p>Live Social App for Pi Community</p>
+  <p>Login with Pi</p>
   <button class="btn-purple" onclick="login()">Login with Pi</button>
 </div>
 
-<!-- APP -->
 <div id="appPage" style="display:none;">
-
   <h2 id="username"></h2>
 
-  <!-- WALLET -->
   <div class="card">
-    <h3>Your Wallet</h3>
-
-    <p>Unlocked Balance</p>
-    <h2 id="chukBalance">0</h2>
-
-    <p>Locked Balance</p>
-    <h2 id="lockedBalance">0</h2>
-
-    <p>Pi Balance</p>
-    <h2 id="piBalance">0</h2>
-
-    <p>Total Balance</p>
-    <h2 id="totalBalance">0</h2>
+    <h3>Wallet</h3>
+    <p>CHUK: <span id="chukBalance">0</span></p>
+    <p>PI: <span id="piBalance">0</span></p>
   </div>
 
-  <!-- ACTION -->
   <div class="card">
     <button class="btn-purple" onclick="earnChuk()">🎁 Earn</button>
-    <button class="btn-purple" onclick="unlockChuk()">🔓 Unlock</button>
-    <button class="btn-purple" onclick="exchangeChuk()">🔄 Exchange</button>
+    <button class="btn-green" onclick="payWithPi()">💸 Buy CHUK</button>
   </div>
-
-  <!-- 🔥 BUY -->
-  <div class="card">
-    <h3>Buy CHUK</h3>
-    <button class="btn-green" onclick="payWithPi()">💸 Buy CHUK with Pi</button>
-    <div id="loading">⏳ Processing payment...</div>
-  </div>
-
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-  if (typeof Pi !== "undefined") {
-    Pi.init({ version: "2.0", sandbox: true });
-  } else {
-    alert("⚠️ Buka di Pi Browser!");
-  }
-
-  loadWallet();
-});
-
-// 🔥 GANTI DENGAN BACKEND KAMU
 const BASE_URL = "https://chuk-an-chukk-beckend.vercel.app/api";
-
-let currentUser = null;
 
 let wallet = {
   chuk: 50000,
-  locked: 25000,
-  testPi: 10
+  pi: 10
 };
 
-// LOGIN
+let currentUser = null;
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (typeof Pi !== "undefined") {
+    Pi.init({ version: "2.0", sandbox: true });
+  }
+
+  updateUI();
+});
+
 async function login() {
   try {
     const auth = await Pi.authenticate(["username"]);
     currentUser = auth.user;
 
     document.getElementById("username").innerText =
-      "Welcome back!\n" + currentUser.username;
+      "Welcome " + currentUser.username;
 
-    showSection("app");
+    document.getElementById("loginPage").style.display = "none";
+    document.getElementById("appPage").style.display = "block";
 
-  } catch (err) {
+  } catch {
     alert("Login gagal");
   }
 }
 
-// WALLET
-function loadWallet() {
-  const saved = localStorage.getItem("wallet");
-
-  if (saved) {
-    wallet = JSON.parse(saved);
-  }
-
-  updateUI();
-}
-
-function saveWallet() {
-  localStorage.setItem("wallet", JSON.stringify(wallet));
-}
-
 function updateUI() {
   document.getElementById("chukBalance").innerText = wallet.chuk;
-  document.getElementById("lockedBalance").innerText = wallet.locked;
-  document.getElementById("piBalance").innerText = wallet.testPi;
-  document.getElementById("totalBalance").innerText =
-    wallet.chuk + wallet.locked;
+  document.getElementById("piBalance").innerText = wallet.pi;
 }
 
-// ACTION
 function earnChuk() {
   wallet.chuk += 1000;
-  saveWallet();
   updateUI();
-  alert("+1000 CHUK");
 }
 
-function unlockChuk() {
-  wallet.chuk += wallet.locked;
-  wallet.locked = 0;
-  saveWallet();
-  updateUI();
-  alert("Unlocked!");
-}
-
-function exchangeChuk() {
-  let amt = parseInt(prompt("Jumlah Chuk:"));
-
-  if (!amt || amt > wallet.chuk) {
-    alert("Tidak valid");
-    return;
-  }
-
-  wallet.chuk -= amt;
-  wallet.testPi += amt / 10000;
-
-  saveWallet();
-  updateUI();
-  alert("Berhasil ditukar");
-}
-
-// LOADING
-function showLoading(show) {
-  document.getElementById("loading").style.display =
-    show ? "block" : "none";
-}
-
-// 💸 PAYMENT FINAL
 async function payWithPi() {
-
   if (typeof Pi === "undefined") {
     alert("Buka di Pi Browser!");
     return;
   }
 
   try {
-    showLoading(true);
-
     await Pi.createPayment({
       amount: 0.01,
-      memo: "Buy CHUK",
-      metadata: { user: currentUser?.username || "guest" }
+      memo: "Buy CHUK"
     }, {
 
       onReadyForServerApproval: async (paymentId) => {
@@ -233,36 +142,15 @@ async function payWithPi() {
         });
 
         wallet.chuk += 1000;
-        saveWallet();
         updateUI();
 
-        showLoading(false);
-        alert("💸 Pembayaran berhasil +1000 CHUK!");
-      },
-
-      onCancel: () => {
-        showLoading(false);
-        alert("Dibatalkan");
-      },
-
-      onError: () => {
-        showLoading(false);
-        alert("Error pembayaran");
+        alert("Payment sukses!");
       }
-
     });
 
   } catch (e) {
-    showLoading(false);
     console.error(e);
   }
-}
-
-// UI
-function showSection(id) {
-  document.getElementById("loginPage").style.display = "none";
-  document.getElementById("appPage").style.display = "none";
-  document.getElementById(id + "Page").style.display = "block";
 }
 </script>
 
