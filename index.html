@@ -1,723 +1,258 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-  <meta charset="UTF-8">
-  <meta name="viewport"
-  content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
   <title>Chuk an Chukk</title>
 
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
-
-  <meta name="theme-color" content="#6b2cff">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style"
-  content="black-translucent">
-
-  <!-- ICON -->
-  <link rel="apple-touch-icon"
-  href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
-
-  <!-- PI SDK -->
+  <!-- Pi SDK -->
   <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 
-  <style>
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
+  <style>
     *{
       margin:0;
       padding:0;
       box-sizing:border-box;
+      font-family:'Poppins',sans-serif;
     }
 
     body{
-      font-family:Arial, sans-serif;
-      background:#0b0b0f;
-      color:white;
+      background:#6fd6d6;
       min-height:100vh;
-      padding:20px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      overflow:hidden;
+      position:relative;
     }
 
-    h1,h2,h3{
-      margin-bottom:10px;
+    /* Background Glow */
+    .bg1,
+    .bg2{
+      position:absolute;
+      border-radius:50%;
+      filter:blur(80px);
+      opacity:0.4;
+    }
+
+    .bg1{
+      width:300px;
+      height:300px;
+      background:#ffd700;
+      top:-80px;
+      left:-80px;
+    }
+
+    .bg2{
+      width:250px;
+      height:250px;
+      background:#ffffff;
+      bottom:-80px;
+      right:-80px;
     }
 
     .container{
-      max-width:500px;
-      margin:auto;
+      width:360px;
+      background:rgba(255,255,255,0.15);
+      border:1px solid rgba(255,255,255,0.2);
+      backdrop-filter:blur(15px);
+      border-radius:30px;
+      padding:40px 30px;
+      text-align:center;
+      color:white;
+      box-shadow:0 10px 40px rgba(0,0,0,0.2);
+      z-index:2;
     }
 
     .logo{
-      text-align:center;
-      margin-top:30px;
-      margin-bottom:30px;
-    }
-
-    .logo h1{
-      font-size:40px;
-      color:#8b5cf6;
-    }
-
-    .card{
-      background:#18181f;
-      border:1px solid #27272f;
-      border-radius:16px;
-      padding:20px;
+      width:100px;
+      height:100px;
+      margin:auto;
+      border-radius:50%;
+      background:linear-gradient(145deg,#ffd700,#ffea70);
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      font-size:52px;
+      font-weight:700;
+      color:#444;
+      box-shadow:0 0 25px rgba(255,215,0,0.7);
       margin-bottom:20px;
-      box-shadow:0 0 10px rgba(0,0,0,0.3);
     }
 
-    .wallet-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:15px;
+    h1{
+      font-size:32px;
+      color:#ffd700;
+      margin-bottom:10px;
+      font-weight:700;
     }
 
-    .wallet-box{
-      background:#23232d;
+    .tagline{
+      font-size:14px;
+      color:#ffffff;
+      margin-bottom:30px;
+      line-height:1.5;
+    }
+
+    .btn{
+      width:100%;
       padding:15px;
-      border-radius:12px;
-      text-align:center;
+      border:none;
+      border-radius:15px;
+      background:linear-gradient(145deg,#ffd700,#ffea70);
+      color:#333;
+      font-size:16px;
+      font-weight:700;
+      cursor:pointer;
+      transition:0.3s;
+      box-shadow:0 5px 15px rgba(255,215,0,0.4);
     }
 
-    .wallet-box p{
-      color:#aaa;
+    .btn:hover{
+      transform:translateY(-2px);
+    }
+
+    .user-box{
+      margin-top:25px;
+      padding:15px;
+      border-radius:15px;
+      background:rgba(255,255,255,0.15);
+      display:none;
+    }
+
+    .user-box h3{
+      color:#ffd700;
       margin-bottom:5px;
     }
 
-    .wallet-box h2{
-      color:#8b5cf6;
-    }
-
-    button{
-      width:100%;
-      padding:14px;
-      border:none;
-      border-radius:12px;
-      margin-top:10px;
-      font-weight:bold;
-      cursor:pointer;
-      transition:0.2s;
-      font-size:16px;
-    }
-
-    button:hover{
-      opacity:0.9;
-    }
-
-    .btn-purple{
-      background:#6b2cff;
-      color:white;
-    }
-
-    .btn-green{
-      background:#00c853;
-      color:white;
-    }
-
-    .btn-red{
-      background:#ff3b30;
-      color:white;
-    }
-
-    input{
-      width:100%;
-      padding:14px;
-      border:none;
-      border-radius:12px;
-      margin-top:10px;
-      background:#23232d;
-      color:white;
-      font-size:16px;
-    }
-
-    #loading{
-      display:none;
-      text-align:center;
-      margin-top:15px;
-      color:#8b5cf6;
-    }
-
-    .history-item{
-      background:#23232d;
-      padding:12px;
-      border-radius:10px;
-      margin-top:10px;
-    }
-
-    .notification{
-      position:fixed;
-      top:20px;
-      right:20px;
-      background:#8b5cf6;
-      padding:12px 18px;
-      border-radius:12px;
-      display:none;
-      z-index:999;
+    .status{
+      margin-top:20px;
+      font-size:13px;
+      color:#fff;
+      opacity:0.8;
     }
 
     .footer{
-      text-align:center;
-      color:#666;
-      margin-top:30px;
-      font-size:14px;
+      margin-top:25px;
+      font-size:12px;
+      opacity:0.7;
     }
 
+    .support{
+      margin-top:20px;
+    }
+
+    .support a{
+      color:#ffd700;
+      text-decoration:none;
+      font-weight:600;
+    }
   </style>
 </head>
 
 <body>
 
-<div class="notification" id="notification">
-  Notification
-</div>
+<div class="bg1"></div>
+<div class="bg2"></div>
 
 <div class="container">
 
-  <!-- LOGIN -->
-  <div id="loginPage">
-
-    <div class="logo">
-      <h1>CHUK</h1>
-      <p>Live Social App for Pi Community</p>
-    </div>
-
-    <div class="card">
-      <h2>Login with Pi</h2>
-
-      <button class="btn-purple"
-      onclick="login()">
-        Login with Pi
-      </button>
-
-      <button id="installBtn"
-      class="btn-green"
-      style="display:none;">
-        📲 Install App
-      </button>
-
-    </div>
-
+  <!-- Logo -->
+  <div class="logo">
+    C
   </div>
 
-  <!-- APP -->
-  <div id="appPage" style="display:none;">
+  <!-- Title -->
+  <h1>Chuk an Chukk</h1>
 
-    <!-- USER -->
-    <div class="card">
-      <h2 id="username">Welcome</h2>
-      <p>Pi Browser Connected</p>
-    </div>
-
-    <!-- WALLET -->
-    <div class="card">
-
-      <h3>Your Wallet</h3>
-
-      <div class="wallet-grid">
-
-        <div class="wallet-box">
-          <p>CHUK</p>
-          <h2 id="chukBalance">0</h2>
-        </div>
-
-        <div class="wallet-box">
-          <p>PI</p>
-          <h2 id="piBalance">0</h2>
-        </div>
-
-        <div class="wallet-box">
-          <p>Locked</p>
-          <h2 id="lockedBalance">0</h2>
-        </div>
-
-        <div class="wallet-box">
-          <p>Total</p>
-          <h2 id="totalBalance">0</h2>
-        </div>
-
-      </div>
-
-    </div>
-
-    <!-- EARN -->
-    <div class="card">
-
-      <h3>Earn CHUK</h3>
-
-      <button class="btn-purple"
-      onclick="earnChuk()">
-        🎁 Claim 1000 CHUK
-      </button>
-
-    </div>
-
-    <!-- EXCHANGE -->
-    <div class="card">
-
-      <h3>Exchange CHUK</h3>
-
-      <input
-      type="number"
-      id="exchangeInput"
-      placeholder="Enter CHUK amount">
-
-      <button class="btn-green"
-      onclick="exchangeChuk()">
-        🔄 Exchange
-      </button>
-
-    </div>
-
-    <!-- PAYMENT -->
-    <div class="card">
-
-      <h3>Buy CHUK with Pi</h3>
-
-      <button class="btn-green"
-      onclick="payWithPi()">
-        💸 Pay 0.01 PI
-      </button>
-
-      <div id="loading">
-        ⏳ Processing Payment...
-      </div>
-
-    </div>
-
-    <!-- HISTORY -->
-    <div class="card">
-
-      <h3>Transaction History</h3>
-
-      <div id="history"></div>
-
-    </div>
-
-    <!-- LOGOUT -->
-    <div class="card">
-
-      <button class="btn-red"
-      onclick="logout()">
-        Logout
-      </button>
-
-    </div>
-
+  <!-- Subtitle -->
+  <div class="tagline">
+    Live Social App for Pi Community
   </div>
 
+  <!-- Login Button -->
+  <button class="btn" onclick="loginPi()">
+    Login with Pi
+  </button>
+
+  <!-- User Info -->
+  <div class="user-box" id="userBox">
+    <h3>Welcome</h3>
+    <p id="username"></p>
+  </div>
+
+  <!-- Status -->
+  <div class="status" id="status">
+    Sandbox Mode Active
+  </div>
+
+  <!-- Support -->
+  <div class="support">
+    <a href="#">Support Center</a>
+  </div>
+
+  <!-- Footer -->
   <div class="footer">
-    Chuk an Chukk © 2026
+    © 2026 Chuk an Chukk
   </div>
 
 </div>
 
 <script>
 
-const BASE_URL =
-"https://chuk-an-chukk-beckend.vercel.app/api";
-
-let currentUser = null;
-
-let wallet = {
-  chuk:50000,
-  pi:10,
-  locked:5000
-};
-
-let historyList = [];
-
-
-// INIT
-document.addEventListener("DOMContentLoaded", () => {
-
-  // PI INIT
-  if(typeof Pi !== "undefined"){
-
-    Pi.init({
-      version:"2.0",
-      sandbox:true
-    });
-
-    console.log("Pi SDK Ready");
-
-  }else{
-
-    alert("Open in Pi Browser");
-
-  }
-
-  registerSW();
-
-  detectBrowser();
-
-  updateUI();
-
-});
-
-
-// DETECT BROWSER
-function detectBrowser(){
-
-  const isPiBrowser =
-  navigator.userAgent.includes("PiBrowser");
-
-  if(isPiBrowser){
-    console.log("Pi Browser");
-  }else{
-    console.log("Chrome Browser");
-  }
-
-}
-
-
-// LOGIN
-async function login(){
-
-  try{
-
-    const auth =
-    await Pi.authenticate(["username"]);
-
-    currentUser = auth.user;
-
-    document.getElementById("username")
-    .innerText =
-    "Welcome " + currentUser.username;
-
-    document.getElementById("loginPage")
-    .style.display = "none";
-
-    document.getElementById("appPage")
-    .style.display = "block";
-
-    notify("Login Success");
-
-  }catch(err){
-
-    console.error(err);
-
-    alert("Login Failed");
-
-  }
-
-}
-
-
-// LOGOUT
-function logout(){
-
-  currentUser = null;
-
-  document.getElementById("loginPage")
-  .style.display = "block";
-
-  document.getElementById("appPage")
-  .style.display = "none";
-
-  notify("Logout Success");
-
-}
-
-
-// UPDATE UI
-function updateUI(){
-
-  document.getElementById("chukBalance")
-  .innerText = wallet.chuk;
-
-  document.getElementById("piBalance")
-  .innerText = wallet.pi;
-
-  document.getElementById("lockedBalance")
-  .innerText = wallet.locked;
-
-  document.getElementById("totalBalance")
-  .innerText =
-  wallet.chuk + wallet.locked;
-
-}
-
-
-// NOTIFICATION
-function notify(text){
-
-  const notif =
-  document.getElementById("notification");
-
-  notif.innerText = text;
-
-  notif.style.display = "block";
-
-  setTimeout(()=>{
-
-    notif.style.display = "none";
-
-  },3000);
-
-}
-
-
-// EARN
-function earnChuk(){
-
-  wallet.chuk += 1000;
-
-  addHistory(
-  "Earned 1000 CHUK");
-
-  updateUI();
-
-  notify("+1000 CHUK");
-
-}
-
-
-// EXCHANGE
-function exchangeChuk(){
-
-  const amount =
-  parseInt(
-    document.getElementById("exchangeInput")
-    .value
-  );
-
-  if(!amount || amount <=0){
-
-    alert("Invalid amount");
-
-    return;
-
-  }
-
-  if(amount > wallet.chuk){
-
-    alert("Not enough balance");
-
-    return;
-
-  }
-
-  wallet.chuk -= amount;
-
-  wallet.pi += amount / 1000;
-
-  addHistory(
-  "Exchange " + amount + " CHUK");
-
-  updateUI();
-
-  notify("Exchange Success");
-
-}
-
-
-// HISTORY
-function addHistory(text){
-
-  historyList.unshift(text);
-
-  renderHistory();
-
-}
-
-
-function renderHistory(){
-
-  const history =
-  document.getElementById("history");
-
-  history.innerHTML = "";
-
-  historyList.forEach(item=>{
-
-    history.innerHTML += `
-      <div class="history-item">
-        ${item}
-      </div>
-    `;
-
+  // Initialize Pi SDK
+  Pi.init({
+    version: "2.0",
+    sandbox: true
   });
 
-}
+  // Login Function
+  async function loginPi(){
 
+    try{
 
-// LOADING
-function showLoading(show){
+      document.getElementById("status").innerHTML =
+      "Connecting to Pi Network...";
 
-  document.getElementById("loading")
-  .style.display =
-  show ? "block" : "none";
+      const scopes = ['username','payments'];
 
-}
-
-
-// PAYMENT
-async function payWithPi(){
-
-  if(typeof Pi === "undefined"){
-
-    alert("Open in Pi Browser");
-
-    return;
-
-  }
-
-  try{
-
-    showLoading(true);
-
-    await Pi.createPayment({
-
-      amount:0.01,
-
-      memo:"Buy CHUK",
-
-      metadata:{
-        user:
-        currentUser?.username || "guest"
-      }
-
-    },{
-
-      onReadyForServerApproval:
-      async(paymentId)=>{
-
-        await fetch(
-        BASE_URL + "/approve",{
-
-          method:"POST",
-
-          headers:{
-            "Content-Type":"application/json"
-          },
-
-          body:JSON.stringify({
-            paymentId
-          })
-
-        });
-
-      },
-
-      onReadyForServerCompletion:
-      async(paymentId,txid)=>{
-
-        await fetch(
-        BASE_URL + "/complete",{
-
-          method:"POST",
-
-          headers:{
-            "Content-Type":"application/json"
-          },
-
-          body:JSON.stringify({
-            paymentId,
-            txid
-          })
-
-        });
-
-        wallet.chuk += 1000;
-
-        updateUI();
-
-        addHistory(
-        "Bought 1000 CHUK");
-
-        notify("Payment Success");
-
-        showLoading(false);
-
-      },
-
-      onCancel:()=>{
-
-        showLoading(false);
-
-        notify("Payment Cancelled");
-
-      },
-
-      onError:(err)=>{
-
-        console.error(err);
-
-        showLoading(false);
-
-        notify("Payment Error");
-
-      }
-
-    });
-
-  }catch(err){
-
-    console.error(err);
-
-    showLoading(false);
-
-  }
-
-}
-
-
-// SERVICE WORKER
-function registerSW(){
-
-  if("serviceWorker" in navigator){
-
-    navigator.serviceWorker
-    .register("service-worker.js")
-
-    .then(()=>{
-
-      console.log(
-      "Service Worker Registered"
+      const authResult = await Pi.authenticate(
+        scopes,
+        onIncompletePaymentFound
       );
 
-    });
+      // Show user info
+      document.getElementById("userBox").style.display = "block";
+
+      document.getElementById("username").innerHTML =
+      "@" + authResult.user.username;
+
+      document.getElementById("status").innerHTML =
+      "Login Success";
+
+      console.log(authResult);
+
+    }catch(error){
+
+      console.error(error);
+
+      document.getElementById("status").innerHTML =
+      "Login Failed";
+
+      alert("Pi Login Failed");
+
+    }
 
   }
 
-}
-
-
-// INSTALL APP
-let deferredPrompt;
-
-window.addEventListener(
-"beforeinstallprompt",
-(e)=>{
-
-  e.preventDefault();
-
-  deferredPrompt = e;
-
-  document.getElementById("installBtn")
-  .style.display = "block";
-
-});
-
-
-document.getElementById("installBtn")
-.addEventListener("click",
-async()=>{
-
-  if(deferredPrompt){
-
-    deferredPrompt.prompt();
-
-    await deferredPrompt.userChoice;
-
-    deferredPrompt = null;
-
+  // Payment callback
+  function onIncompletePaymentFound(payment){
+    console.log("Incomplete Payment Found", payment);
   }
-
-});
 
 </script>
 
