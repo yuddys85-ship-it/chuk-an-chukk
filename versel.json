@@ -1,54 +1,87 @@
-import axios from "axios";
+{
+  "version": 2,
 
-const PI_API_KEY = "YOUR_PI_API_KEY";
+  "name": "chuk-an-chukk",
 
-export default async function handler(req, res) {
+  "cleanUrls": true,
 
-  const { url, method } = req;
+  "trailingSlash": false,
 
-  // 🔥 APPROVE
-  if (url.endsWith("/approve") && method === "POST") {
-    const { paymentId } = req.body;
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
 
-    try {
-      const result = await axios.post(
-        `https://api.minepi.com/v2/payments/${paymentId}/approve`,
-        {},
+  "headers": [
+    {
+      "source": "/manifest.json",
+      "headers": [
         {
-          headers: {
-            Authorization: `Key ${PI_API_KEY}`
-          }
+          "key": "Content-Type",
+          "value": "application/manifest+json"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
         }
-      );
+      ]
+    },
 
-      return res.status(200).json(result.data);
+    {
+      "source": "/service-worker.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
 
-    } catch (err) {
-      return res.status(500).json({ error: "Approve gagal" });
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+
+    {
+      "source": "/css/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+
+    {
+      "source": "/js/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ],
+
+  "functions": {
+    "api/*.js": {
+      "memory": 1024,
+      "maxDuration": 10
     }
   }
-
-  // 🔥 COMPLETE
-  if (url.endsWith("/complete") && method === "POST") {
-    const { paymentId } = req.body;
-
-    try {
-      const result = await axios.post(
-        `https://api.minepi.com/v2/payments/${paymentId}/complete`,
-        {},
-        {
-          headers: {
-            Authorization: `Key ${PI_API_KEY}`
-          }
-        }
-      );
-
-      return res.status(200).json(result.data);
-
-    } catch (err) {
-      return res.status(500).json({ error: "Complete gagal" });
-    }
-  }
-
-  return res.status(404).json({ error: "Not found" });
 }
