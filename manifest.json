@@ -2,57 +2,18 @@
   "name": "Chuk an Chukk",
   "short_name": "CHUK",
   "description": "Live Social App for Pi Community",
+
   "start_url": "/",
   "scope": "/",
+
   "display": "standalone",
   "orientation": "portrait",
+
   "background_color": "#0b0b0f",
   "theme_color": "#6b2cff",
+
   "lang": "en",
   "dir": "ltr",
-
-  "icons": [
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
-      "sizes": "72x72",
-      "type": "image/png"
-    },
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
-      "sizes": "96x96",
-      "type": "image/png"
-    },
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
-      "sizes": "128x128",
-      "type": "image/png"
-    },
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
-      "sizes": "144x144",
-      "type": "image/png"
-    },
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
-      "sizes": "152x152",
-      "type": "image/png"
-    },
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
-      "sizes": "384x384",
-      "type": "image/png"
-    },
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ],
 
   "categories": [
     "finance",
@@ -60,32 +21,65 @@
     "productivity"
   ],
 
-  "shortcuts": [
+  "icons": [
     {
-      "name": "Wallet",
-      "short_name": "Wallet",
-      "description": "Open Wallet",
-      "url": "/#wallet",
-      "icons": [
-        {
-          "src": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
-          "sizes": "192x192"
-        }
-      ]
+      "src": "assets/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png"
     },
     {
-      "name": "Exchange",
-      "short_name": "Exchange",
-      "description": "Open Exchange",
-      "url": "/#exchange",
-      "icons": [
-        {
-          "src": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
-          "sizes": "192x192"
-        }
-      ]
+      "src": "assets/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
 
-  "prefer_related_applications": false
+  "screenshots": [
+    {
+      "src": "assets/screenshot1.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Home Screen"
+    },
+    {
+      "src": "assets/screenshot2.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Wallet Screen"
+    }
+  ]
 }
