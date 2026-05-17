@@ -1,227 +1,585 @@
 // ==============================
-// INIT PI SDK
-// ==============================
-document.addEventListener("DOMContentLoaded", function () {
-  if (typeof Pi !== "undefined") {
-    Pi.init({
-      version: "2.0",
-      sandbox: true
-    });
-  } else {
-    alert("⚠️ Buka aplikasi di Pi Browser!");
-  }
+// =========================
+// CHUK AN CHUKK APP JS
+// =========================
 
-  loadWallet();
-});
+const BASE_URL =
+"https://chuk-an-chukk-beckend.vercel.app/api";
 
-// ==============================
-// BACKEND URL (SUDAH FIX)
-// ==============================
-const BASE_URL = "https://chuk-an-chukk-beckend.vercel.app/api";
-
-// ==============================
-// GLOBAL STATE
-// ==============================
 let currentUser = null;
 
+// WALLET DATA
 let wallet = {
-  chuk: 0,
-  locked: 0,
-  testPi: 10
+  chuk: 50000,
+  pi: 10,
+  locked: 5000
 };
 
-// ==============================
-// LOGIN PI
-// ==============================
-async function login() {
-  try {
-    if (typeof Pi === "undefined") {
-      notify("Harus buka di Pi Browser!");
-      return;
-    }
+// HISTORY
+let historyList = [];
 
-    const auth = await Pi.authenticate(["username"], function(payment) {
-      console.log("Incomplete payment:", payment);
+
+// =========================
+// INIT
+// =========================
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    initPi();
+
+    detectBrowser();
+
+    registerSW();
+
+    updateUI();
+
+  }
+);
+
+
+// =========================
+// PI SDK INIT
+// =========================
+
+function initPi(){
+
+  if(typeof Pi !== "undefined"){
+
+    Pi.init({
+      version:"2.0",
+      sandbox:true
     });
+
+    console.log("Pi SDK Ready");
+
+  }else{
+
+    console.log("Not in Pi Browser");
+
+  }
+
+}
+
+
+// =========================
+// DETECT BROWSER
+// =========================
+
+function detectBrowser(){
+
+  const isPiBrowser =
+  navigator.userAgent.includes(
+    "PiBrowser"
+  );
+
+  if(isPiBrowser){
+
+    console.log("Running in Pi Browser");
+
+  }else{
+
+    console.log("Running in Chrome");
+
+  }
+
+}
+
+
+// =========================
+// LOGIN
+// =========================
+
+async function login(){
+
+  try{
+
+    const auth =
+    await Pi.authenticate(
+      ["username"]
+    );
 
     currentUser = auth.user;
 
-    document.getElementById("username").innerText =
-      "👤 " + currentUser.username;
+    document.getElementById(
+      "username"
+    ).innerText =
+    "Welcome " +
+    currentUser.username;
 
-    showSection("app");
+    document.getElementById(
+      "loginPage"
+    ).style.display = "none";
 
-    notify("✅ Login berhasil!");
+    document.getElementById(
+      "appPage"
+    ).style.display = "block";
 
-  } catch (err) {
+    notify("Login Success");
+
+  }catch(err){
+
     console.error(err);
-    notify("❌ Login gagal");
-  }
-}
 
-// ==============================
-// WALLET SYSTEM
-// ==============================
-function loadWallet() {
-  const saved = localStorage.getItem("chuk_wallet");
+    alert("Login Failed");
 
-  if (saved) {
-    wallet = JSON.parse(saved);
-  } else {
-    wallet.chuk = 50000;
-    wallet.locked = 25000;
-    wallet.testPi = 10;
-    saveWallet();
   }
 
-  updateUI();
 }
 
-function saveWallet() {
-  localStorage.setItem("chuk_wallet", JSON.stringify(wallet));
+
+// =========================
+// LOGOUT
+// =========================
+
+function logout(){
+
+  currentUser = null;
+
+  document.getElementById(
+    "loginPage"
+  ).style.display = "block";
+
+  document.getElementById(
+    "appPage"
+  ).style.display = "none";
+
+  notify("Logout Success");
+
 }
 
-function updateUI() {
-  document.getElementById("chukBalance").innerText = wallet.chuk;
-  document.getElementById("lockedBalance").innerText = wallet.locked;
-  document.getElementById("piBalance").innerText = wallet.testPi;
+
+// =========================
+// UPDATE UI
+// =========================
+
+function updateUI(){
+
+  document.getElementById(
+    "chukBalance"
+  ).innerText = wallet.chuk;
+
+  document.getElementById(
+    "piBalance"
+  ).innerText = wallet.pi;
+
+  document.getElementById(
+    "lockedBalance"
+  ).innerText = wallet.locked;
+
+  document.getElementById(
+    "totalBalance"
+  ).innerText =
+  wallet.chuk + wallet.locked;
+
 }
 
-// ==============================
-// UNLOCK SYSTEM
-// ==============================
-function unlockChuk() {
-  if (wallet.locked <= 0) {
-    notify("Tidak ada Chuk terkunci");
-    return;
-  }
 
-  wallet.chuk += wallet.locked;
-  wallet.locked = 0;
+// =========================
+// NOTIFICATION
+// =========================
 
-  saveWallet();
-  updateUI();
+function notify(text){
 
-  notify("🔓 Chuk berhasil di-unlock!");
-}
-
-// ==============================
-// EXCHANGE (SIMULASI)
-// ==============================
-function exchangeChuk() {
-  const amount = parseInt(prompt("Masukkan jumlah Chuk:"));
-
-  if (!amount || amount <= 0) {
-    notify("Jumlah tidak valid");
-    return;
-  }
-
-  if (amount > wallet.chuk) {
-    notify("Saldo tidak cukup");
-    return;
-  }
-
-  const pi = amount / 10000;
-
-  const confirmTx = confirm(
-    `Tukar ${amount} Chuk menjadi ${pi} Pi?\n\nTransaksi tidak dapat dibatalkan.`
+  const notif =
+  document.getElementById(
+    "notification"
   );
 
-  if (!confirmTx) return;
+  notif.innerText = text;
 
-  wallet.chuk -= amount;
-  wallet.testPi += pi;
+  notif.style.display = "block";
 
-  saveWallet();
-  updateUI();
+  setTimeout(()=>{
 
-  notify("✅ Berhasil tukar ke Pi!");
+    notif.style.display = "none";
+
+  },3000);
+
 }
 
-// ==============================
-// DEMO TAMBAH CHUK
-// ==============================
-function earnChuk() {
+
+// =========================
+// EARN CHUK
+// =========================
+
+function earnChuk(){
+
   wallet.chuk += 1000;
 
-  saveWallet();
+  addHistory(
+    "Earned 1000 CHUK"
+  );
+
   updateUI();
 
-  notify("🎁 +1000 Chuk didapat!");
+  saveData();
+
+  notify("+1000 CHUK");
+
 }
 
-// ==============================
-// PAYMENT PI (SUDAH TERHUBUNG)
-// ==============================
-async function payWithPi() {
-  try {
-    if (typeof Pi === "undefined") {
-      notify("Buka di Pi Browser!");
-      return;
-    }
 
-    const payment = await Pi.createPayment({
-      amount: 0.01,
-      memo: "Buy CHUK",
-      metadata: { type: "chuk_purchase" }
-    }, {
+// =========================
+// EXCHANGE
+// =========================
 
-      // APPROVE
-      onReadyForServerApproval: async function(paymentId) {
-        console.log("APPROVE:", paymentId);
+function exchangeChuk(){
 
-        await fetch(BASE_URL + "/approve", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ paymentId })
-        });
-      },
+  const amount =
+  parseInt(
+    document.getElementById(
+      "exchangeInput"
+    ).value
+  );
 
-      // COMPLETE
-      onReadyForServerCompletion: async function(paymentId, txid) {
-        console.log("COMPLETE:", paymentId, txid);
+  if(!amount || amount <=0){
 
-        await fetch(BASE_URL + "/complete", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ paymentId })
-        });
+    alert("Invalid amount");
 
-        notify("💸 Pembayaran berhasil!");
-      },
+    return;
 
-      onCancel: function() {
-        notify("❌ Pembayaran dibatalkan");
-      },
+  }
 
-      onError: function(err) {
-        console.error(err);
-        notify("⚠️ Error pembayaran");
+  if(amount > wallet.chuk){
+
+    alert("Not enough balance");
+
+    return;
+
+  }
+
+  wallet.chuk -= amount;
+
+  wallet.pi += amount / 1000;
+
+  addHistory(
+    "Exchange " +
+    amount +
+    " CHUK"
+  );
+
+  updateUI();
+
+  saveData();
+
+  notify("Exchange Success");
+
+}
+
+
+// =========================
+// HISTORY
+// =========================
+
+function addHistory(text){
+
+  historyList.unshift(text);
+
+  renderHistory();
+
+}
+
+
+function renderHistory(){
+
+  const history =
+  document.getElementById(
+    "history"
+  );
+
+  history.innerHTML = "";
+
+  historyList.forEach(item=>{
+
+    history.innerHTML += `
+      <div class="history-item">
+        ${item}
+      </div>
+    `;
+
+  });
+
+}
+
+
+// =========================
+// SAVE LOCAL DATA
+// =========================
+
+function saveData(){
+
+  localStorage.setItem(
+    "wallet",
+    JSON.stringify(wallet)
+  );
+
+  localStorage.setItem(
+    "history",
+    JSON.stringify(historyList)
+  );
+
+}
+
+
+// =========================
+// LOAD LOCAL DATA
+// =========================
+
+function loadData(){
+
+  const savedWallet =
+  localStorage.getItem("wallet");
+
+  const savedHistory =
+  localStorage.getItem("history");
+
+  if(savedWallet){
+
+    wallet =
+    JSON.parse(savedWallet);
+
+  }
+
+  if(savedHistory){
+
+    historyList =
+    JSON.parse(savedHistory);
+
+    renderHistory();
+
+  }
+
+}
+
+
+// =========================
+// LOADING
+// =========================
+
+function showLoading(show){
+
+  document.getElementById(
+    "loading"
+  ).style.display =
+  show ? "block" : "none";
+
+}
+
+
+// =========================
+// PAYMENT
+// =========================
+
+async function payWithPi(){
+
+  if(typeof Pi === "undefined"){
+
+    alert("Open in Pi Browser");
+
+    return;
+
+  }
+
+  try{
+
+    showLoading(true);
+
+    await Pi.createPayment({
+
+      amount:0.01,
+
+      memo:"Buy CHUK",
+
+      metadata:{
+        user:
+        currentUser?.username ||
+        "guest"
       }
+
+    },{
+
+      onReadyForServerApproval:
+      async(paymentId)=>{
+
+        await fetch(
+          BASE_URL + "/approve",
+          {
+            method:"POST",
+
+            headers:{
+              "Content-Type":
+              "application/json"
+            },
+
+            body:JSON.stringify({
+              paymentId
+            })
+
+          }
+        );
+
+      },
+
+      onReadyForServerCompletion:
+      async(paymentId,txid)=>{
+
+        await fetch(
+          BASE_URL + "/complete",
+          {
+            method:"POST",
+
+            headers:{
+              "Content-Type":
+              "application/json"
+            },
+
+            body:JSON.stringify({
+              paymentId,
+              txid
+            })
+
+          }
+        );
+
+        wallet.chuk += 1000;
+
+        updateUI();
+
+        saveData();
+
+        addHistory(
+          "Bought 1000 CHUK"
+        );
+
+        notify(
+          "Payment Success"
+        );
+
+        showLoading(false);
+
+      },
+
+      onCancel:()=>{
+
+        showLoading(false);
+
+        notify(
+          "Payment Cancelled"
+        );
+
+      },
+
+      onError:(err)=>{
+
+        console.error(err);
+
+        showLoading(false);
+
+        notify("Payment Error");
+
+      }
+
     });
 
-  } catch (err) {
+  }catch(err){
+
     console.error(err);
+
+    showLoading(false);
+
   }
+
 }
 
-// ==============================
-// UI CONTROL
-// ==============================
-function showSection(id) {
-  document.getElementById("loginPage").style.display = "none";
-  document.getElementById("appPage").style.display = "none";
 
-  document.getElementById(id + "Page").style.display = "block";
+// =========================
+// INSTALL APP
+// =========================
+
+let deferredPrompt;
+
+window.addEventListener(
+  "beforeinstallprompt",
+  (e)=>{
+
+    e.preventDefault();
+
+    deferredPrompt = e;
+
+    const installBtn =
+    document.getElementById(
+      "installBtn"
+    );
+
+    if(installBtn){
+
+      installBtn.style.display =
+      "block";
+
+    }
+
+  }
+);
+
+
+const installBtn =
+document.getElementById(
+  "installBtn"
+);
+
+if(installBtn){
+
+  installBtn.addEventListener(
+    "click",
+    async()=>{
+
+      if(deferredPrompt){
+
+        deferredPrompt.prompt();
+
+        await deferredPrompt.userChoice;
+
+        deferredPrompt = null;
+
+      }
+
+    }
+  );
+
 }
 
-// ==============================
-// NOTIFICATION
-// ==============================
-function notify(msg) {
-  alert(msg);
+
+// =========================
+// SERVICE WORKER
+// =========================
+
+function registerSW(){
+
+  if("serviceWorker"
+    in navigator){
+
+    navigator.serviceWorker
+    .register(
+      "service-worker.js"
+    )
+
+    .then(()=>{
+
+      console.log(
+        "Service Worker Registered"
+      );
+
+    });
+
+  }
+
 }
+
+
+// =========================
+// LOAD SAVED DATA
+// =========================
+
+loadData();
