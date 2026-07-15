@@ -1,260 +1,182 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Chuk an Chukk</title>
 
-  <!-- Pi SDK -->
-  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#6b2cff">
+  <link rel="icon" href="assets/icon-192.png">
 
-  <!-- Font -->
+  <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-  <style>
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-      font-family:'Poppins',sans-serif;
-    }
+  <!-- Style -->
+  <link rel="stylesheet" href="style.css">
 
-    body{
-      background:#6fd6d6;
-      min-height:100vh;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      overflow:hidden;
-      position:relative;
-    }
-
-    /* Background Glow */
-    .bg1,
-    .bg2{
-      position:absolute;
-      border-radius:50%;
-      filter:blur(80px);
-      opacity:0.4;
-    }
-
-    .bg1{
-      width:300px;
-      height:300px;
-      background:#ffd700;
-      top:-80px;
-      left:-80px;
-    }
-
-    .bg2{
-      width:250px;
-      height:250px;
-      background:#ffffff;
-      bottom:-80px;
-      right:-80px;
-    }
-
-    .container{
-      width:360px;
-      background:rgba(255,255,255,0.15);
-      border:1px solid rgba(255,255,255,0.2);
-      backdrop-filter:blur(15px);
-      border-radius:30px;
-      padding:40px 30px;
-      text-align:center;
-      color:white;
-      box-shadow:0 10px 40px rgba(0,0,0,0.2);
-      z-index:2;
-    }
-
-    .logo{
-      width:100px;
-      height:100px;
-      margin:auto;
-      border-radius:50%;
-      background:linear-gradient(145deg,#ffd700,#ffea70);
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      font-size:52px;
-      font-weight:700;
-      color:#444;
-      box-shadow:0 0 25px rgba(255,215,0,0.7);
-      margin-bottom:20px;
-    }
-
-    h1{
-      font-size:32px;
-      color:#ffd700;
-      margin-bottom:10px;
-      font-weight:700;
-    }
-
-    .tagline{
-      font-size:14px;
-      color:#ffffff;
-      margin-bottom:30px;
-      line-height:1.5;
-    }
-
-    .btn{
-      width:100%;
-      padding:15px;
-      border:none;
-      border-radius:15px;
-      background:linear-gradient(145deg,#ffd700,#ffea70);
-      color:#333;
-      font-size:16px;
-      font-weight:700;
-      cursor:pointer;
-      transition:0.3s;
-      box-shadow:0 5px 15px rgba(255,215,0,0.4);
-    }
-
-    .btn:hover{
-      transform:translateY(-2px);
-    }
-
-    .user-box{
-      margin-top:25px;
-      padding:15px;
-      border-radius:15px;
-      background:rgba(255,255,255,0.15);
-      display:none;
-    }
-
-    .user-box h3{
-      color:#ffd700;
-      margin-bottom:5px;
-    }
-
-    .status{
-      margin-top:20px;
-      font-size:13px;
-      color:#fff;
-      opacity:0.8;
-    }
-
-    .footer{
-      margin-top:25px;
-      font-size:12px;
-      opacity:0.7;
-    }
-
-    .support{
-      margin-top:20px;
-    }
-
-    .support a{
-      color:#ffd700;
-      text-decoration:none;
-      font-weight:600;
-    }
-  </style>
+  <!-- Pi SDK -->
+  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 </head>
 
 <body>
 
-<div class="bg1"></div>
-<div class="bg2"></div>
+<div id="notification" class="notification"></div>
 
-<div class="container">
+<div class="container fade-in">
 
-  <!-- Logo -->
-  <div class="logo">
-    C
-  </div>
+    <div class="logo">
+        <img src="assets/logo.png" alt="Chuk an Chukk">
+        <h1>Chuk an Chukk</h1>
+        <p>Live Social App for Pi Community</p>
+    </div>
 
-  <!-- Title -->
-  <h1>Chuk an Chukk</h1>
+    <!-- LOGIN PAGE -->
 
-  <!-- Subtitle -->
-  <div class="tagline">
-    Live Social App for Pi Community
-  </div>
+    <div id="loginPage">
 
-  <!-- Login Button -->
-  <button class="btn" onclick="loginPi()">
-    Login with Pi
-  </button>
+        <button class="btn-purple" onclick="login()">
+            Login with Pi
+        </button>
 
-  <!-- User Info -->
-  <div class="user-box" id="userBox">
-    <h3>Welcome</h3>
-    <p id="username"></p>
-  </div>
+    </div>
 
-  <!-- Status -->
-  <div class="status" id="status">
-    Sandbox Mode Active
-  </div>
+    <!-- APP PAGE -->
 
-  <!-- Support -->
-  <div class="support">
-    <a href="#">Support Center</a>
-  </div>
+    <div id="appPage" style="display:none;">
 
-  <!-- Footer -->
-  <div class="footer">
-    © 2026 Chuk an Chukk
-  </div>
+        <div class="card glass">
+
+            <h2 id="username">
+                Welcome
+            </h2>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Wallet</h3>
+
+            <div class="wallet-grid">
+
+                <div class="wallet-box">
+
+                    <p>CHUK</p>
+
+                    <h2 id="chukBalance">0</h2>
+
+                </div>
+
+                <div class="wallet-box">
+
+                    <p>PI</p>
+
+                    <h2 id="piBalance">0</h2>
+
+                </div>
+
+                <div class="wallet-box">
+
+                    <p>Locked</p>
+
+                    <h2 id="lockedBalance">0</h2>
+
+                </div>
+
+                <div class="wallet-box">
+
+                    <p>Total</p>
+
+                    <h2 id="totalBalance">0</h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Exchange CHUK</h3>
+
+            <input
+                id="exchangeInput"
+                type="number"
+                placeholder="Amount">
+
+            <button
+                class="btn-green"
+                onclick="exchangeChuk()">
+
+                Exchange
+
+            </button>
+
+        </div>
+
+        <div class="card">
+
+            <button
+                class="btn-purple"
+                onclick="earnChuk()">
+
+                Earn 1000 CHUK
+
+            </button>
+
+            <button
+                class="btn-green"
+                onclick="payWithPi()">
+
+                Buy CHUK With Pi
+
+            </button>
+
+            <button
+                id="installBtn"
+                class="btn-purple"
+                style="display:none;">
+
+                Install App
+
+            </button>
+
+            <button
+                class="btn-red"
+                onclick="logout()">
+
+                Logout
+
+            </button>
+
+        </div>
+
+        <div class="card">
+
+            <h3>History</h3>
+
+            <div id="history"></div>
+
+        </div>
+
+    </div>
+
+    <div id="loading">
+        Loading...
+    </div>
+
+    <div class="footer">
+
+        © 2026 Chuk an Chukk
+
+    </div>
 
 </div>
 
-<script>
-
-  // Initialize Pi SDK
-  Pi.init({
-    version: "2.0",
-    sandbox: true
-  });
-
-  // Login Function
-  async function loginPi(){
-
-    try{
-
-      document.getElementById("status").innerHTML =
-      "Connecting to Pi Network...";
-
-      const scopes = ['username','payments'];
-
-      const authResult = await Pi.authenticate(
-        scopes,
-        onIncompletePaymentFound
-      );
-
-      // Show user info
-      document.getElementById("userBox").style.display = "block";
-
-      document.getElementById("username").innerHTML =
-      "@" + authResult.user.username;
-
-      document.getElementById("status").innerHTML =
-      "Login Success";
-
-      console.log(authResult);
-
-    }catch(error){
-
-      console.error(error);
-
-      document.getElementById("status").innerHTML =
-      "Login Failed";
-
-      alert("Pi Login Failed");
-
-    }
-
-  }
-
-  // Payment callback
-  function onIncompletePaymentFound(payment){
-    console.log("Incomplete Payment Found", payment);
-  }
-
-</script>
+<script src="script.js"></script>
 
 </body>
 </html>
