@@ -1,0 +1,12 @@
+CHUK AN CHUKK
+MAIN REPOSITORY
+
+Sumber fitur:
+chuk-an-chukk-app
+
+Target:
+chuk-an-chukk
+
+Status:
+Persiapan penggabungan fitur.
+Jangan hapus file lama.
