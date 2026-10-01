@@ -55,69 +55,12 @@
     ========================== -->
     <main class="feed" id="homeFeed">
 
-        <!-- POST CONTAINER -->
-        <section class="post">
+        <!--
+            POSTINGAN DARI SUPABASE
+            AKAN DIMUAT OLEH home.js
+        -->
 
-            <!-- MEDIA -->
-            <div class="post-media-container">
-
-                <div class="post-media-placeholder">
-                    <span>VIDEO / FOTO POST</span>
-                </div>
-
-                <!-- ACTIONS -->
-                <div class="post-actions-side">
-
-                    <button
-                        type="button"
-                        aria-label="Suka"
-                    >
-                        ❤️
-                    </button>
-
-                    <button
-                        type="button"
-                        aria-label="Komentar"
-                    >
-                        💬
-                    </button>
-
-                    <button
-                        type="button"
-                        aria-label="Bagikan"
-                    >
-                        ↗️
-                    </button>
-
-                    <button
-                        type="button"
-                        aria-label="Simpan"
-                    >
-                        🔖
-                    </button>
-
-                </div>
-
-            </div>
-
-
-            <!-- POST INFORMATION -->
-            <div class="post-info">
-
-                <div class="post-user">
-                    @username
-                </div>
-
-                <div class="post-caption">
-                    Deskripsi postingan
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- EMPTY / LOADING AREA -->
+        <!-- LOADING -->
         <div
             id="homeLoading"
             class="loading"
@@ -126,6 +69,7 @@
             Memuat postingan...
         </div>
 
+        <!-- EMPTY -->
         <div
             id="homeEmpty"
             class="no-post"
@@ -181,6 +125,21 @@
     </nav>
 
 </div>
+
+
+<!-- =========================
+     SUPABASE
+========================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="supabase.js"></script>
+
+<!-- =========================
+     HOME FEED
+========================== -->
+
+<script src="home.js"></script>
 
 </body>
 </html>
